@@ -1,8 +1,8 @@
-:: Taller de escalada de privilegios local - Fr4nzisko (@ Fr4nzisko1) 
+:: Taller de escalada de privilegios local - Fr4nzisko (@ Fr4nzisko1)
 @echo off
 setlocal EnableDelayedExpansion
 
-:: Esta parte del código se utiliza para varios colores en .bat
+:: This portion of code is used for multiple colors in .bat
 :: https://stackoverflow.com/questions/4339649/how-to-have-multiple-colors-in-a-windows-batch-file/5344911
 for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1) do rem"') do (
   set "DEL=%%a"
@@ -10,56 +10,52 @@ for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1)
 <nul > X set /p ".=."
 
 :::
-:::     Taller de escalada de privilegios local - instalador de Windows
-:::             Fr4nzisko (@ Fr4nzisko1) 
+:::
+::: ;-.            ,--.                   ,   .         .               
+::: |  )     o     |              o       | . | o       |               
+::: |-'  ;-. . . , |-   ,-. ,-.   . ;-.   | ) ) . ;-. ,-| ,-. , , , ,-. 
+::: |    |   | |/  |    `-. |     | | |   |/|/  | | | | | | | |/|/  `-. 
+::: '    '   ' '   `--' `-' `-'   ' ' '   ' '   ' ' ' `-' `-' ' '   `-' 
+:::                                                               
+:::     Local Privilege Escalation Workshop - Windows Installer
+:::                            By:Fr4nzisko
 
 for /f "delims=: tokens=*" %%A in ('findstr /b ::: "%~f0"') do (
   echo(%%A
 )
 echo.
 
-:: Compruebe si el script se está ejecutando en un contexto de alta integridad
-whoami /groups | findstr /i /c:"Ejecutar como administrador" >nul && (
-   goto main
-) || (
-   call :color 0c "[-] Para ejecutar este archivo se requiere 'Ejecutar como administrador'. Saliendo..."
-   echo.
-   del /f X
-   pause
-   exit /b
-)
-
 :main
-:: Configuración inicial
-call :color 0f "[*] Configuración inicial"
+:: Initial Setup
+call :color 0f "[*] Initial Setup"
 echo .
-call :color 0f "[*] Desactivando todos los perfiles de firewall"
+call :color 0f "[*] Disabling All Firewall Profiles"
 echo.
 netsh advfirewall set allprofiles state off > nul
-call :color 0f "[*] Deshabilitando el defensor de Windows"
+call :color 0f "[*] Disabling Windows Defender"
 echo.
 reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender" /v DisableAntiSpyware /t REG_DWORD /d 1 /f > nul
 reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender" /v DisableRealtimeMonitoring /t REG_DWORD /d 1 /f > nul
-call :color 0f "[*] Creación de una cuenta de usuario estándar.."
+call :color 0f "[*] Creating a standard user account.."
 echo.
-call :color 0e "[i] Nombre de usuario: alexander    Clave: minipassword..,,"
+call :color 0e "[i] Username: user    Password: password4321"
 echo.
-net user alexander >nul 2>&1
+net user user >nul 2>&1
 if %errorlevel% == 0 (
-   net user alexander minipassword..,, >nul 2>&1
+   net user user password4321 >nul 2>&1
 ) else (
-   net user alexander minipassword..,, /add >nul 2>&1
+   net user user password4321 /add >nul 2>&1
 )
-call :color 0f "[*] Creación de una cuenta de administrador local.."
+call :color 0f "[*] Creating a local admin account.."
 echo.
-call :color 0e "[i] Nombre de usuario: admin    Clave: superpassword..,,"
+call :color 0e "[i] Username: admin    Password: password1234"
 echo.
 net user admin >nul 2>&1
 if %errorlevel% == 0 (
-   net user admin superpassword..,, >nul 2>&1
+   net user admin password1234 >nul 2>&1
    net localgroup administrators admin /add >nul 2>&1
 ) else (
-   net user admin superpassword..,, /add >nul 2>&1
+   net user admin password1234 /add >nul 2>&1
    net localgroup administrators admin /add >nul 2>&1
 )
 if not exist "C:\EscPriv" (
@@ -71,12 +67,12 @@ if not exist "C:\Windows\Repair" (
 if not exist "C:\DevTools" (
     mkdir "C:\DevTools"
 )
-call :color 0a "[+] Configuración inicial completa."
+call :color 0a "[+] Initial setup complete."
 echo.
 echo.
 
-:: Servicios(DLL Hijacking)
-call :color 0f "[*] Configuración de servicios (DLL Hijacking)"
+:: Services (DLL Hijacking)
+call :color 0f "[*] Configuring Services (DLL Hijacking)"
 echo.
 call :write_file dllhijackservice.exe
 call :calculate_md5 dllhijackservice.exe, ret_md5_val
@@ -90,12 +86,12 @@ setx /m Path "%PATH%;C:\Temp" >nul
 call :create_service "dllsvc", "C:\Program Files\DLL Hijack Service\dllhijackservice.exe", "DLL Hijack Service"
 call :set_service_permissions "dllsvc", "D:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;RPWPLCRCCCLOSW;;;WD)S:(AU;FA;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)"
 call :start_service "dllsvc"
-call :color 0a "[+] Servicios (DLL Hijacking) Configuración completa."
+call :color 0a "[+] Services (DLL Hijacking) configuration complete."
 echo.
 echo.
 
 :: Services (binPath)
-call :color 0f "[*] Configuración de servicios(binPath)"
+call :color 0f "[*] Configuring Services (binPath)"
 echo.
 call :write_file daclservice.exe
 call :calculate_md5 daclservice.exe, ret_md5_val
@@ -105,12 +101,12 @@ call :reset_file_permissions "C:\Program Files\DACL Service\daclservice.exe"
 call :create_service "daclsvc", "C:\Program Files\DACL Service\daclservice.exe", "DACL Service"
 call :set_service_permissions "daclsvc", "D:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;RPWPLCRCCCLOSWDC;;;WD)S:(AU;FA;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)"
 call :start_service "daclsvc"
-call :color 0a "[+] Servicios (binPath) Configuración completa."
+call :color 0a "[+] Services (binPath) configuration complete."
 echo.
 echo.
 
-:: Servicios (Unquoted Path)
-call :color 0f "[*] Configuración de servicios (Unquoted Path)"
+:: Services (Unquoted Path)
+call :color 0f "[*] Configuring Services (Unquoted Path)"
 echo.
 call :write_file unquotedpathservice.exe
 call :calculate_md5 unquotedpathservice.exe, ret_md5_val
@@ -120,12 +116,12 @@ call :reset_file_permissions "C:\Program Files\Unquoted Path Service"
 call :create_service "unquotedsvc", "C:\Program Files\Unquoted Path Service\Common Files\unquotedpathservice.exe", "Unquoted Path Service"
 call :set_service_permissions "unquotedsvc", "D:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;RPWPLCRCCCLOSW;;;WD)S:(AU;FA;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)"
 call :start_service "unquotedsvc"
-call :color 0a "[+] Servicios (Unquoted Path) Configuración completa."
+call :color 0a "[+] Services (Unquoted Path) configuration complete."
 echo.
 echo.
 
-:: Servicios (Registry)
-call :color 0f "[*] Configuración de servicios (Registry)"
+:: Services (Registry)
+call :color 0f "[*] Configuring Services (Registry)"
 echo.
 call :write_file insecureregistryservice.exe
 call :calculate_md5 insecureregistryservice.exe, ret_md5_val
@@ -134,18 +130,18 @@ call :move_file insecureregistryservice.exe, "C:\Program Files\Insecure Registry
 call :reset_file_permissions "C:\Program Files\Insecure Registry Service\insecureregistryservice.exe"
 call :create_service "regsvc", "C:\Program Files\Insecure Registry Service\insecureregistryservice.exe", "Insecure Registry Service"
 call :set_service_permissions "regsvc", "D:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;RPWPLCRCCCLOSW;;;WD)S:(AU;FA;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)"
-call :color 0f "[*] Cambio de permisos de registro para regsvc.."
+call :color 0f "[*] Changing registry permissions for regsvc.."
 echo.
 echo HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\services\regsvc [17 1 21 8] > regsvc.txt
 regini regsvc.txt
 del /f regsvc.txt
 call :start_service "regsvc"
-call :color 0a "[+] Servicios (Registry) configuración completa."
+call :color 0a "[+] Services (Registry) configuration complete."
 echo.
 echo.
 
-:: Servicios (Executable File)
-call :color 0f "[*] Configuración de servicios (Executable File)"
+:: Services (Executable File)
+call :color 0f "[*] Configuring Services (Executable File)"
 echo.
 call :write_file filepermservice.exe
 call :calculate_md5 filepermservice.exe, ret_md5_val
@@ -155,63 +151,63 @@ call :reset_file_permissions "C:\Program Files\File Permissions Service\fileperm
 call :create_service "filepermsvc", "C:\Program Files\File Permissions Service\filepermservice.exe", "File Permissions Service"
 call :set_service_permissions "filepermsvc", "D:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;RPWPLCRCCCLOSW;;;WD)S:(AU;FA;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)"
 call :start_service "filepermsvc"
-call :color 0a "[+] Servicios (Executable File) Configuración completa."
+call :color 0a "[+] Services (Executable File) configuration complete."
 echo.
 echo.
 
-:: Registro (Autorun)
-call :color 0f "[*] Configurando el registro (Autorun)"
+:: Registry (Autorun)
+call :color 0f "[*] Configuring Registry (Autorun)"
 echo.
-call :color 0f "[*] Copiando el programa ficticio.."
+call :color 0f "[*] Copying dummy program.."
 echo.
 copy /y C:\Windows\System32\locator.exe .\program.exe >nul
 call :move_file program.exe, "C:\Program Files\Autorun Program"
 call :reset_file_permissions "C:\Program Files\Autorun Program\program.exe"
-call :color 0f "[*] Agregar programa para ejecutar al inicio a través del registro.."
+call :color 0f "[*] Adding program to run at startup via registry.."
 echo.
 reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run /v "My Program" /t REG_SZ /d "\"C:\Program Files\Autorun Program\program.exe\"" /f >nul
-call :color 0a "[+] Registro (Autorun) Configuración completa."
+call :color 0a "[+] Registry (Autorun) configuration complete."
 echo.
 echo.
 
-:: Registro (AlwaysInstallElevated)
-call :color 0f "[*] Configurando el registro (AlwaysInstallElevated)"
+:: Registry (AlwaysInstallElevated)
+call :color 0f "[*] Configuring Registry (AlwaysInstallElevated)"
 echo.
-call :color 0f "[*] Habilitación AlwaysInstallElevated a través del registro.."
+call :color 0f "[*] Enabling AlwaysInstallElevated via registry.."
 echo.
 reg add HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v "AlwaysInstallElevated" /t REG_DWORD /d 1 /f >nul
-call :color 0f "[*] La configuración final se ejecutará al reiniciar..."
+call :color 0f "[*] Final configuration will run upon restart..."
 echo.
-call :color 0a "[+] Registro (AlwaysInstallElevated) Configuración completa."
+call :color 0a "[+] Registry (AlwaysInstallElevated) configuration complete."
 echo.
 echo.
 
-:: Minería de contraseñas (Registry)
-call :color 0f "[*] Configurando la minería de contraseña (Registry)"
+:: Password Mining (Registry)
+call :color 0f "[*] Configuring Password Mining (Registry)"
 echo.
-call :color 0f "[*] Añadiendo autologon usuario al registro.."
+call :color 0f "[*] Adding autologon user to registry.."
 echo.
 reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "DefaultUsername" /t REG_SZ /d admin /f >nul
-reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "DefaultPassword" /t REG_SZ /d superpassword..,, /f >nul
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "DefaultPassword" /t REG_SZ /d password1234 /f >nul
 reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "AutoAdminLogon" /t REG_SZ /d 1 /f >nul
-call :color 0a "[+] Minería de contraseñas (Registry) Configuración completa."
+call :color 0a "[+] Password Mining (Registry) configuration complete."
 echo.
 echo.
 
-:: Minería de contraseñas (Configuration Files)
-call :color 0f "[*] Configurando la minería de contraseña (Configuration Files)"
+:: Password Mining (Configuration Files)
+call :color 0f "[*] Configuring Password Mining (Configuration Files)"
 echo.
 call :write_file Unattend.xml
 call :calculate_md5 Unattend.xml, ret_md5_val
 call :confirm_md5_hash "63f7269bbc53e36d2a8c323721313f9c", "%ret_md5_val%" || goto :eof
 call :move_file Unattend.xml, "C:\Windows\Panther"
 call :reset_file_permissions "C:\Windows\Panther\Unattend.xml"
-call :color 0a "[+] Minería de contraseñas (Configuration Files) Configuración completa."
+call :color 0a "[+] Password Mining (Configuration Files) configuration complete."
 echo.
 echo.
 
-:: Tareas programadas
-call :color 0f "[*] Configuración de tareas programadas"
+:: Scheduled Tasks
+call :color 0f "[*] Configuring Scheduled Tasks"
 echo.
 call :write_file CleanUp.ps1
 call :calculate_md5 CleanUp.ps1, ret_md5_val
@@ -219,20 +215,20 @@ call :confirm_md5_hash "9b8377237f5dea36d6af73e3f8f932a2", "%ret_md5_val%" || go
 call :move_file CleanUp.ps1, "C:\DevTools"
 call :reset_file_permissions "C:\DevTools\CleanUp.ps1"
 schtasks /Create /F /RU SYSTEM /SC Minute /TN "CleanUp" /TR "powershell.exe -exec bypass -nop C:\DevTools\CleanUp.ps1" >nul
-call :color 0a "[+] Configuración de tarea programada completa."
+call :color 0a "[+] Scheduled Task configuration complete."
 echo.
 echo.
 
-:: Aplicaciones de inicio
-call :color 0f "[*] Configuración de aplicaciones de inicio"
+:: Startup Applications
+call :color 0f "[*] Configuring Startup Applications"
 echo.
 call :reset_file_permissions "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
-call :color 0a "[+] Configuración de aplicaciones de inicio completa."
+call :color 0a "[+] Startup Applications configuration complete."
 echo.
 echo.
 
-:: Creación de tareas de configuración final para completar al reiniciar
-call :color 0f "[*] Creación de la tarea de configuración final para ejecutarse al reiniciar..."
+:: Creating final configuration task to complete upon restart
+call :color 0f "[*] Creating final configuration task to run upon restart..."
 echo.
 call :write_file lpe.bat
 call :calculate_md5 lpe.bat, ret_md5_val
@@ -248,19 +244,19 @@ call :write_file savecred.bat
 call :calculate_md5 savecred.bat, ret_md5_val
 call :confirm_md5_hash "5d8190e96d1b2e3230e1fd2409db81db", "%ret_md5_val%" || goto :eof
 call :move_file savecred.bat, "C:\EscPriv"
-icacls C:\EscPriv\savecred.bat /grant alexander:RX >nul 2>&1
-schtasks /Create /F /RU "alexander" /SC ONLOGON /TN "SaveCred" /TR "\"C:\EscPriv\savecred.bat\"" >nul
+icacls C:\EscPriv\savecred.bat /grant user:RX >nul 2>&1
+schtasks /Create /F /RU "user" /SC ONLOGON /TN "SaveCred" /TR "\"C:\EscPriv\savecred.bat\"" >nul
 
 :: return 0
-call :color 0a "[+] Configuración completada correctamente."
+call :color 0a "[+] Configuration completed successfully."
 echo.
-call :color 0a "[+] Por favor reinicie Windows para comenzar."
+call :color 0a "[+] Please restart Windows to begin."
 echo.
 del /f X
 pause
 exit /b
 
-:: Esta parte del código utilizada para varios colores en .bat
+:: This portion of code used for multiple colors in .bat
 :: https://stackoverflow.com/questions/4339649/how-to-have-multiple-colors-in-a-windows-batch-file/5344911
 :color
 set "param=^%~2" !
@@ -503,7 +499,7 @@ exit /b
 
 :calculate_md5
 set file=%~1
-call :color 0f "[*] Calculando el hash md5 de %file%.."
+call :color 0f "[*] Calculating MD5 hash of %file%.."
 echo.
 for /f "tokens=*" %%i in ('certutil -hashfile %file% MD5 ^| find /i /v "md5" ^| find /i /v "certutil"') do set %~2=%%i
 exit /b
@@ -511,14 +507,14 @@ exit /b
 :confirm_md5_hash
 set original_hash=%~1
 set calculated_hash=%~2
-call :color 0f "[*] Confirmando hash.. (!original_hash!)"
+call :color 0f "[*] Confirming hash.. (!original_hash!)"
 echo.
 if !original_hash! == !calculated_hash! (
-    call :color 0a "[+] Hash confirmado."
+    call :color 0a "[+] Hash confirmed."
     echo.
     exit /b 0
 ) else (
-    call :color 0c "[-] Hash mismatch. Exitoso.."
+    call :color 0c "[-] Hash mismatch. Exiting.."
     echo.
     del /f X
     pause
@@ -530,7 +526,7 @@ exit /b
 @echo off
 set file=%~1
 set dir=%~2
-call :color 0f "[*] moviendo archivo a"
+call :color 0f "[*] Moving file to"
 for %%a in ("%dir:\=" "%") do (
     if %%~a == C: (
         call :color 0f " %%~a\"
@@ -547,7 +543,7 @@ exit /b
 
 :reset_file_permissions
 set file_path=%~1
-call :color 0f "[*] Permisos de reinicio.."
+call :color 0f "[*] Resetting permissions.."
 echo.
 if "!file_path!" == "C:\Program Files\File Permissions Service\filepermservice.exe" (
     icacls "!file_path!" /grant Everyone:F >nul 2>&1
@@ -586,7 +582,7 @@ exit /b
 set service_name=%~1
 set service_path=%~2
 set service_display_name=%~3
-call :color 0f "[*] Creando Servicio %service_name% .."
+call :color 0f "[*] Creating %service_name% service.."
 echo.
 if !service_name! == unquotedsvc (
     sc create %service_name% binpath= "%service_path%" type= own displayname= "%service_display_name%" >nul
@@ -598,14 +594,14 @@ exit /b
 :set_service_permissions
 set service_name=%~1
 set service_sddl=%~2
-call :color 0f "[*] Configuración de permisos de servicio.."
+call :color 0f "[*] Setting service permissions.."
 echo.
 sc sdset %service_name% %service_sddl% >nul
 exit /b
 
 :start_service
 set service_name=%~1
-call :color 0f "[*] Servicio de inicio.."
+call :color 0f "[*] Starting service.."
 echo.
 sc start %service_name% >nul
 exit /b
