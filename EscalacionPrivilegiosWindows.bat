@@ -38,28 +38,28 @@ reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender" /v Dis
 reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender" /v DisableRealtimeMonitoring /t REG_DWORD /d 1 /f > nul
 call :color 0f "[*] Creating a standard user account.."
 echo.
-call :color 0e "[i] Username: user    Password: password4321"
+call :color 0e "[i] Username: user    Password: password321"
 echo.
 net user user >nul 2>&1
 if %errorlevel% == 0 (
-   net user user password4321 >nul 2>&1
+   net user user password321 >nul 2>&1
 ) else (
-   net user user password4321 /add >nul 2>&1
+   net user user password321 /add >nul 2>&1
 )
 call :color 0f "[*] Creating a local admin account.."
 echo.
-call :color 0e "[i] Username: admin    Password: password1234"
+call :color 0e "[i] Username: admin    Password: password123"
 echo.
 net user admin >nul 2>&1
 if %errorlevel% == 0 (
-   net user admin password1234 >nul 2>&1
+   net user admin password123 >nul 2>&1
    net localgroup administrators admin /add >nul 2>&1
 ) else (
-   net user admin password1234 /add >nul 2>&1
+   net user admin password123 /add >nul 2>&1
    net localgroup administrators admin /add >nul 2>&1
 )
-if not exist "C:\EscPriv" (
-    mkdir "C:\EscPriv"
+if not exist "C:\PrivEsc" (
+    mkdir "C:\PrivEsc"
 )
 if not exist "C:\Windows\Repair" (
     mkdir "C:\Windows\Repair"
@@ -188,7 +188,7 @@ echo.
 call :color 0f "[*] Adding autologon user to registry.."
 echo.
 reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "DefaultUsername" /t REG_SZ /d admin /f >nul
-reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "DefaultPassword" /t REG_SZ /d password1234 /f >nul
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "DefaultPassword" /t REG_SZ /d password123 /f >nul
 reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "AutoAdminLogon" /t REG_SZ /d 1 /f >nul
 call :color 0a "[+] Password Mining (Registry) configuration complete."
 echo.
@@ -233,19 +233,19 @@ echo.
 call :write_file lpe.bat
 call :calculate_md5 lpe.bat, ret_md5_val
 call :confirm_md5_hash "a61df3883f400102e17894d7e6177c92", "%ret_md5_val%" || goto :eof
-call :move_file lpe.bat, "C:\EscPriv"
-schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "LPE" /TR "\"C:\EscPriv\lpe.bat\"" >nul
+call :move_file lpe.bat, "C:\PrivEsc"
+schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "LPE" /TR "\"C:\PrivEsc\lpe.bat\"" >nul
 call :write_file AdminPaint.lnk
 call :calculate_md5 AdminPaint.lnk, ret_md5_val
 call :confirm_md5_hash "30b7a4303bcf16936432f30ce13edbb9", "%ret_md5_val%" || goto :eof
-call :move_file AdminPaint.lnk, "C:\EscPriv"
-call :reset_file_permissions "C:\EscPriv\AdminPaint.lnk"
+call :move_file AdminPaint.lnk, "C:\PrivEsc"
+call :reset_file_permissions "C:\PrivEsc\AdminPaint.lnk"
 call :write_file savecred.bat
 call :calculate_md5 savecred.bat, ret_md5_val
 call :confirm_md5_hash "5d8190e96d1b2e3230e1fd2409db81db", "%ret_md5_val%" || goto :eof
-call :move_file savecred.bat, "C:\EscPriv"
-icacls C:\EscPriv\savecred.bat /grant user:RX >nul 2>&1
-schtasks /Create /F /RU "user" /SC ONLOGON /TN "SaveCred" /TR "\"C:\EscPriv\savecred.bat\"" >nul
+call :move_file savecred.bat, "C:\PrivEsc"
+icacls C:\PrivEsc\savecred.bat /grant user:RX >nul 2>&1
+schtasks /Create /F /RU "user" /SC ONLOGON /TN "SaveCred" /TR "\"C:\PrivEsc\savecred.bat\"" >nul
 
 :: return 0
 call :color 0a "[+] Configuration completed successfully."
@@ -565,7 +565,7 @@ if "!file_path!" == "C:\Windows\Panther\Unattend.xml" (
     icacls "!file_path!" /grant Everyone:R >nul 2>&1
     exit /b
 )
-if "!file_path!" == "C:\EscPriv\AdminPaint.lnk" (
+if "!file_path!" == "C:\PrivEsc\AdminPaint.lnk" (
     icacls "!file_path!" /grant Everyone:R >nul 2>&1
     exit /b
 )
